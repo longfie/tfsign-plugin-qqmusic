@@ -2,14 +2,15 @@
     "schema_version": 1,
     "code": "qqmusic",
     "name": "QQ音乐",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "description": "QQ音乐会员成长值每日任务：签到、头像挂件、主题装扮、逛听书与收听节目",
     "logo_url": "https://raw.githubusercontent.com/longfie/tfsign-plugin-qqmusic/main/logo.jpg",
+    "changelog": "新增 QQ 扫码登录，添加账号时可直接用手机 QQ 扫码。\n调整「允许收听节目任务」的说明文案。",
     "entrypoint": "plugin\\qqmusic\\QqMusicPlugin",
     "sort_order": 910,
     "credential_types": ["cookie"],
     "implementation_status": "ready",
-    "connection_methods": ["credentials"],
+    "connection_methods": ["qq_qr", "credentials"],
     "credential_labels": {
         "uin": "QQ 号",
         "qm_keyst": "qm_keyst（Cookie 中 Q_H_L_ 开头的值）",
@@ -37,7 +38,7 @@
             "type": "boolean",
             "label": "允许收听节目任务",
             "default": false,
-            "description": "收听节目通过伪造播放上报完成，违反 QQ 音乐服务条款，存在封号风险。开启后「收听节目」动作才会执行；建议每天 00:00 和 06:00 各执行一次，当天完成当天领取。"
+            "description": "存在封号风险。开启后「收听节目」动作才会执行；建议每天 00:00 和 06:00 各执行一次，当天完成当天领取。"
         },
         {
             "key": "tme_uid",

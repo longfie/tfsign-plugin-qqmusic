@@ -32,9 +32,9 @@ final class QqMusicClient
         return $this->musicKey;
     }
 
-    public static function time33(string $value): int
+    public static function time33(string $value, int $seed = 5381): int
     {
-        $hash = 5381;
+        $hash = $seed;
         $length = strlen($value);
         for ($i = 0; $i < $length; $i++) {
             $hash = ($hash + ($hash << 5) + ord($value[$i])) & 0xFFFFFFFF;

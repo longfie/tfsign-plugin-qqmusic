@@ -4,6 +4,7 @@ namespace plugin\qqmusic;
 
 use app\exception\ApiException;
 use app\sign\contract\CredentialRefreshAwareInterface;
+use app\sign\contract\QrLoginPluginInterface;
 use app\sign\contract\SignPluginInterface;
 use app\sign\dto\AccountProfile;
 use app\sign\dto\HealthResult;
@@ -12,7 +13,7 @@ use app\sign\dto\SignContext;
 use app\sign\dto\SignRecord;
 use app\sign\dto\SignResult;
 
-final class QqMusicPlugin implements SignPluginInterface, CredentialRefreshAwareInterface
+final class QqMusicPlugin implements SignPluginInterface, CredentialRefreshAwareInterface, QrLoginPluginInterface
 {
     private const TASK_NAMES = ['8' => '头像挂件', '9' => '主题装扮', '30' => '逛听书频道', '20' => '收听节目'];
     private const AWARD_OK = 0;
@@ -35,7 +36,7 @@ final class QqMusicPlugin implements SignPluginInterface, CredentialRefreshAware
         return new PluginMetadata(
             'qqmusic',
             'QQ音乐',
-            '1.0.1',
+            '1.1.0',
             'QQ音乐会员成长值每日任务：签到、头像挂件、主题装扮、逛听书与收听节目',
             ['cookie'],
             'ready',
@@ -102,6 +103,25 @@ final class QqMusicPlugin implements SignPluginInterface, CredentialRefreshAware
     public function healthCheck(): HealthResult
     {
         return new HealthResult(true, 'QQ 音乐插件可用');
+    }
+
+    public function startQr(string $method): array
+    {
+        self::assertQrMethod($method);
+        return (new QqMusicQrLogin($this->http))->start();
+    }
+
+    public function pollQr(string $method, array $context): array
+    {
+        self::assertQrMethod($method);
+        return (new QqMusicQrLogin($this->http))->poll($context);
+    }
+
+    private static function assertQrMethod(string $method): void
+    {
+        if ($method !== 'qq_qr') {
+            throw new ApiException('PLATFORM_METHOD_UNSUPPORTED', 'QQ 音乐只支持 QQ 扫码登录', 422);
+        }
     }
 
     /** @return list<SignRecord> */

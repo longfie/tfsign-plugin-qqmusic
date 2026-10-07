@@ -9,7 +9,7 @@ class CurlHttp
 {
     /**
      * @param list<string> $headers
-     * @return array{status:int, body:string}
+     * @return array{status:int, body:string, headers:list<string>}
      */
     public function request(string $method, string $url, array $headers = [], ?string $body = null, int $timeout = 20): array
     {
@@ -17,6 +17,7 @@ class CurlHttp
         if ($handle === false) {
             throw new ApiException('QQMUSIC_HTTP_FAILED', 'QQ 音乐请求初始化失败', 502);
         }
+        $responseHeaders = [];
         curl_setopt_array($handle, [
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_RETURNTRANSFER => true,
@@ -25,6 +26,13 @@ class CurlHttp
             CURLOPT_TIMEOUT => $timeout,
             CURLOPT_HTTPHEADER => $headers,
             CURLOPT_ENCODING => '',
+            CURLOPT_HEADERFUNCTION => static function ($curl, string $line) use (&$responseHeaders): int {
+                $trimmed = trim($line);
+                if ($trimmed !== '') {
+                    $responseHeaders[] = $trimmed;
+                }
+                return strlen($line);
+            },
         ]);
         if ($body !== null) {
             curl_setopt($handle, CURLOPT_POSTFIELDS, $body);
@@ -36,6 +44,32 @@ class CurlHttp
         if (!is_string($raw)) {
             throw new ApiException('QQMUSIC_HTTP_FAILED', 'QQ 音乐请求失败：' . ($error !== '' ? $error : '无响应'), 502);
         }
-        return ['status' => $status, 'body' => $raw];
+        return ['status' => $status, 'body' => $raw, 'headers' => $responseHeaders];
+    }
+
+    /**
+     * @param list<string> $headers
+     * @return array<string, string>
+     */
+    public static function cookies(array $headers): array
+    {
+        $cookies = [];
+        foreach ($headers as $header) {
+            if (preg_match('/^Set-Cookie:\s*([^=;\s]+)=([^;]*)/i', $header, $match) && $match[2] !== '') {
+                $cookies[$match[1]] = $match[2];
+            }
+        }
+        return $cookies;
+    }
+
+    /** @param list<string> $headers */
+    public static function header(array $headers, string $name): string
+    {
+        foreach ($headers as $header) {
+            if (stripos($header, $name . ':') === 0) {
+                return trim(substr($header, strlen($name) + 1));
+            }
+        }
+        return '';
     }
 }
