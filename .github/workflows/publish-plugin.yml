@@ -1,0 +1,24 @@
+# 复制到插件仓库的 .github/workflows/publish-plugin.yml。
+# 仓库 Secret TFSIGN_STORE_TOKEN 需要能向本平台仓库发送 repository_dispatch。
+name: 发布到天方插件商店
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  publish:
+    name: 通知商店构建
+    runs-on: ubuntu-24.04
+    steps:
+      - name: 请求平台仓库打包并上架
+        env:
+          GH_TOKEN: ${{ secrets.TFSIGN_STORE_TOKEN }}
+          STORE_REPOSITORY: longfie/tfsign
+        run: |
+          set -euo pipefail
+          gh api -X POST "repos/${STORE_REPOSITORY}/dispatches" \
+            -f event_type=publish-plugin \
+            -f "client_payload[repository]=${GITHUB_REPOSITORY}" \
+            -f "client_payload[ref]=${GITHUB_REF_NAME}" \
+            -f "client_payload[path]=."

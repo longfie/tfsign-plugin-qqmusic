@@ -1,0 +1,54 @@
+{
+    "schema_version": 1,
+    "code": "qqmusic",
+    "name": "QQ音乐",
+    "version": "1.0.0",
+    "description": "QQ音乐会员成长值每日任务：签到、头像挂件、主题装扮、逛听书与收听节目",
+    "entrypoint": "plugin\\qqmusic\\QqMusicPlugin",
+    "sort_order": 910,
+    "credential_types": ["cookie"],
+    "implementation_status": "ready",
+    "connection_methods": ["credentials"],
+    "credential_labels": {
+        "uin": "QQ 号",
+        "qm_keyst": "qm_keyst（Cookie 中 Q_H_L_ 开头的值）",
+        "openid": "QQ 互联 openid（可选，key 过期时用于自动救活）",
+        "access_token": "QQ 互联 access_token（可选，与 openid 配套）"
+    },
+    "account_identity": {
+        "mode": "online",
+        "fingerprint": {
+            "fields": ["uin"]
+        }
+    },
+    "actions": {
+        "daily_tasks": {
+            "label": "每日成长任务"
+        },
+        "listen_program": {
+            "label": "收听节目"
+        }
+    },
+    "admin_settings": [],
+    "account_settings": [
+        {
+            "key": "allow_fake_play",
+            "type": "boolean",
+            "label": "允许收听节目任务",
+            "default": false,
+            "description": "收听节目通过伪造播放上报完成，违反 QQ 音乐服务条款，存在封号风险。开启后「收听节目」动作才会执行；建议每天 00:00 和 06:00 各执行一次，当天完成当天领取。"
+        },
+        {
+            "key": "tme_uid",
+            "type": "string",
+            "label": "QQ 音乐 UID（可选）",
+            "default": "",
+            "max_length": 20,
+            "description": "收听节目上报中的 QQ 音乐内部 UID，可在 stat.y.qq.com 请求里抓到；留空则使用 QQ 号。"
+        }
+    ],
+    "task_policy": {},
+    "runtime": {
+        "mode": "runner"
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "name": "longfie/tfsign-plugin-qqmusic",
+    "description": "天方云签 QQ 音乐会员成长值任务插件",
+    "type": "library",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.4",
+        "ext-curl": "*",
+        "ext-zlib": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "plugin\\qqmusic\\": "src/"
+        }
+    }
+}
