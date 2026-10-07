@@ -19,11 +19,13 @@ final class QqMusicQrLogin
     {
     }
 
-    /** @return array{qr_image:string, context:array{qrsig:string}} */
+    /** @return array{qr_url:string, context:array{qrsig:string}} */
     public function start(): array
     {
+        // 文本二维码链接同时用于页面渲染和移动端唤起手机 QQ 确认登录。
         $response = $this->http->request('GET', 'https://ssl.ptlogin2.qq.com/ptqrshow?' . http_build_query([
             'appid' => self::APP_ID,
+            'type' => '1',
             'e' => '2',
             'l' => 'M',
             's' => '3',
@@ -34,11 +36,17 @@ final class QqMusicQrLogin
             'pt_3rd_aid' => self::CONNECT_APP_ID,
         ]), [self::REFERER]);
         $qrsig = CurlHttp::cookies($response['headers'])['qrsig'] ?? '';
-        if ($qrsig === '' || $response['status'] !== 200 || $response['body'] === '') {
+        $json = preg_match('/^\s*ptui_qrcode_CB\((.*)\)\s*;?\s*$/s', $response['body'], $match)
+            ? json_decode($match[1], true) : null;
+        $qrUrl = is_array($json) && (int)($json['ec'] ?? -1) === 0 && is_string($json['qrcode'] ?? null) ? $json['qrcode'] : '';
+        $parts = parse_url($qrUrl);
+        if ($qrsig === '' || $response['status'] !== 200 || !is_array($parts)
+            || !in_array($parts['scheme'] ?? '', ['http', 'https'], true) || ($parts['host'] ?? '') !== 'txz.qq.com'
+            || ($parts['path'] ?? '') !== '/p') {
             throw new ApiException('QQMUSIC_QR_START_FAILED', 'QQ 登录二维码获取失败', 502);
         }
         return [
-            'qr_image' => 'data:image/png;base64,' . base64_encode($response['body']),
+            'qr_url' => $qrUrl,
             'context' => ['qrsig' => $qrsig],
         ];
     }
