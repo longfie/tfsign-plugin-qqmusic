@@ -36,7 +36,7 @@ final class QqMusicPlugin implements SignPluginInterface, CredentialRefreshAware
         return new PluginMetadata(
             'qqmusic',
             'QQ音乐',
-            '1.1.1',
+            '1.1.2',
             'QQ音乐会员成长值每日任务：签到、头像挂件、主题装扮、逛听书与收听节目',
             ['cookie'],
             'ready',
